@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansza z przyciskami</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Kontener siatki na środku */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            flex-grow: 1;
+        }
+
+        .grid {
+            display: grid; 
+            margin-top: 70px;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 1px;
+            position: relative;
+            width: 750px;
+            height: 500px; 
+            border: 1px solid transparent;
+        }
+
+        .grid button {
+            background-size: cover;
+            background-position: center;
+            border: 1px solid black;
+            aspect-ratio: 2 / 3;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .grid button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Kolumna graczy (po lewej lub prawej) */
+        .circle-buttons {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            width: 290px;
+        }
+
+        .circle-buttons .player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%; 
+        }
+
+        .circle-buttons .big-button {
+            width: 80px;
+            height: 80px;
+            background-color: #fff;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            /* Domyślnie żółta obwódka */
+            border: 4px solid yellow;
+        }
+
+        /* Gracz 6 będzie miał zieloną obwódkę – nadpisanie w inline style lub osobna klasa. */
+        .big-button.green {
+            border-color: green !important;
+        }
+
+        .circle-buttons .nickname {
+            padding: 5px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid black;
+            border-radius: 4px;
+            width: 50%;
+        }
+
+        .circle-buttons .small-buttons {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        /* Każdy guzik i licznik mają position:relative;
+           by hover-efekt z ::after był poprawnie pozycjonowany. */
+        .circle-buttons .small-buttons button,
+        .circle-buttons .card-count {
+            position: relative;
+        }
+
+        .circle-buttons .small-buttons button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid black;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        /* Usuwamy background-image z klas i dajemy inline, ale zachowujemy hover::after */
+        .circle-buttons .small-buttons .pickaxe:hover::after {
+            content: "kilof";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            border: 1px solid black;
+            padding: 2px 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 999;
+        }
+
+        .circle-buttons .small-buttons .lantern:hover::after {
+            content: "latarnia";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            border: 1px solid black;
+            padding: 2px 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 999;
+        }
+
+        .circle-buttons .small-buttons .cart:hover::after {
+            content: "wagonik";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            border: 1px solid black;
+            padding: 2px 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 999;
+        }
+
+        .circle-buttons .card-count {
+            width: 50px;
+            height: 30px;
+            border: 1px solid black;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .circle-buttons .card-count:hover::after {
+            content: "liczba kart na ręce";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fff;
+            border: 1px solid black;
+            padding: 2px 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 999;
+        }
+
+        .bottom-cards {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .bottom-cards .card {
+            width: 80px;
+            aspect-ratio: 2 / 3;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid black;
+            border-radius: 8px;
+            transition: transform 0.5s, top 0.5s, left 0.5s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bottom-cards .card:active {
+            transform: scale(1.5);
+            z-index: 10;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+
+        .round-info {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .turn-info {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .gold-info {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="round-info">Runda 1/3</div>
+    <div class="turn-info">Ruch gracza nr 6!</div>
+    
+    <!-- Kolumna po lewej stronie (gracze 1-10) -->
+    <div class="circle-buttons">
+        <!-- Gracz 1 -->
+        <div class="player">
+            <!-- Tylko gracz 6 będzie miał green, reszta yellow (domyślnie). -->
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname"  placeholder="Nick gracza" value="Gracz 1">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 2 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 2">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 3 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 3">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 4 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 4">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 5 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 5">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+    </div>
+
+    <!-- Kontener z siatką -->
+    <div class="container">
+        <div class="grid">
+            <!-- Zachowujemy wszystkie istniejące przyciski w siatce -->
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/Q01.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/S04.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/Q01.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/Q01.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+            <button style="background-image: url('pictures/F00.png');"></button>
+        </div>
+    </div>
+
+    <!-- Kolumna po prawej stronie (gracze 1-10) -->
+    <div class="circle-buttons">
+
+        <!-- Gracz 6 (zielona obwódka) -->
+        <div class="player">
+            <button class="big-button green" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 6">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 7 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 7">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 8 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 8">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 9 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 9">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+
+        <!-- Gracz 10 -->
+        <div class="player">
+            <button class="big-button" style="background-image: url('person.png');"></button>
+            <input type="text" class="nickname" placeholder="Nick gracza" value="Gracz 10">
+        </div>
+        <div class="small-buttons">
+            <button class="pickaxe" style="background-image: url('kilof.png');"></button>
+            <button class="lantern" style="background-image: url('latarnia.png');"></button>
+            <button class="cart" style="background-image: url('wagon.png');"></button>
+            <div class="card-count">4</div>
+        </div>
+    </div>
+
+    <!-- Karty na dole -->
+    <div class="bottom-cards">
+        <button class="card" style="background-image: url('pictures/B01.png');"></button>
+        <button class="card" style="background-image: url('pictures/B02.png');"></button>
+        <button class="card" style="background-image: url('pictures/E01.png');"></button>
+        <button class="card" style="background-image: url('pictures/E02.png');"></button>
+        <button class="card" style="background-image: url('pictures/E04.png');"></button>
+    </div>
+
+    <div class="gold-info">Zgromadzone złoto: 5</div>
+</body>
+</html>
