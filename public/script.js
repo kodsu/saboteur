@@ -20,11 +20,16 @@ socket.on("setRoom", (n) => {
   window.location.href = "/room/" + n
 });
 
-socket.on("addRoom", (n) => {
+socket.on("newRoom", (n) => {
   const newElem = document.createElement("div");
+  newElem.id = `Room${n}`
   newElem.innerHTML = `<br><label>Pokój ${n}:</label> <button id="room${n}Button" class="joinButton">Dołącz</button>`
   roomList.appendChild(newElem);
   document.querySelector(`#room${n}Button`).addEventListener("click", () => {
     window.location.href = "/room/" + n;
   });
 })
+
+socket.on("delRoom", (n) => {
+  document.querySelector(`#Room${n}`).remove()
+});

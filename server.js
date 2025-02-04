@@ -1,21 +1,36 @@
 const express = require("express");
-const app = express();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const { createServer } = require("node:http");
+const { Server } = require("socket.io");
+const session = require("express-session");
 
-const port = 8080;
+const port = 80;
+
+const app = express();
+const httpServer = createServer(app);
+
+const sessionMiddleware = session({
+  secret: "changeit",
+  resave: true,
+  saveUninitialized: true,
+});
+
+app.use(sessionMiddleware);
+
+const io = new Server(httpServer);
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
 app.use(express.static("public"));
+app.use(sessionMiddleware)
+io.engine.use(sessionMiddleware);
 
 app.get("/", (req, res) => res.render("index"));
 app.get("/room/:n", (req, res) => {
   res.render("room", {"n":req.params.n})
-  // socket.emit("joinRoom", req.params.n);
 });
 
 let roomnums = new Set([]);
+let players = {}
 let names = new Set([]);
 
 const characters = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -37,22 +52,33 @@ function smallest() {
 }
 
 io.on("connect", socket => {
+  const sessionId = socket.request.session.id;
+  console.log(sessionId)
+  socket.join(sessionId);
+
   for(const n of roomnums) {
-    socket.emit("addRoom", n);
+    socket.emit("newRoom", n);
   }
-  socket.on("newRoom", data => {
+  
+  socket.on("newRoom", () => {
     const n = smallest()
+    players[n] = []
     socket.emit("setRoom", n)
-    socket.broadcast.emit("addRoom", n);
+    socket.broadcast.emit("newRoom", n);
     roomnums.add(n)
   })
   socket.on("joinRoom", n => {
     const name = rand_name()
-    socket.to(`Room${n}`).emit("newPlayer", name);
+    console.log("join", n)
+    for(const player of players[n]) {
+      socket.emit("newPlayer", player);
+    }
+    players[n].push(sessionId)
+    socket.to(`Room${n}`).emit("newPlayer", sessionId);
     socket.join(`Room${n}`);
   })
 });
 
-server.listen(port, () =>
+httpServer.listen(port, () =>
   console.log(`app listening at http://localhost:${port}`)
 );
