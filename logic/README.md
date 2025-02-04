@@ -66,26 +66,27 @@ Wszystkie sprowadzaja sie do jednej, najwazniejszej funkcji - `gra`.
 Funkcja `gra (gracze, tury)` przyjmuje dwa parametry - liczbe graczy, bioracych udzial w rozgrywce oraz liczbe tur, ktore zycza sobie rozegrac
 Jedyne co wystarczy zrobic to ją odpalić. Caly przebieg gry, nowe tury, punktacje policzy za nas.
 
-**Jak to osiagnac?** 
+**Jak to osiagnac?**   
+
 Funkcja ma w sobie petle, ktora dla kazdej tury odpala funkcje `init()`, czyli wlasnie przygotowanie nowej tury, obejmujace reset rąk, planszy, nowe rozdania itp itd.
 Ten init zwróci Kubie numer gracza startowego, planszę, ręce wszystkich graczy oraz role wszystkich graczy
 Następnie chciałabym w pętli odbierać jakoś info o tym co gracz o numerze 'kto' probuje zrobic.
 W tym celu potrzebuje jakos pozyskac wspolrzedne pola, na ktore ow gracz chce zagrac karte, numer tej karty oraz parametr "czy", mowiacy o tym czy on tę kartę chce odwrócić.
 Mogę wtedy wywołać ruch od tych argumentow i ruch zwroci Kubie informacje kto bedzie teraz robil ruch, jaki jest stan planszy i jaka jest teraz nowa reka tego gracza co gral.
 No, chyba że nie udalo sie wykonac poprawnie tego ruchu, wtedy zwracamy blad i nic sie nie dzieje innego.
--> co przyjmuje ruch?
-wspolrzedne x,y -> albo te z planszy, czyli odpowiednio od 0 do 6 i od 0 do 10
-albo x od 20 do 20+liczba graczy i wtedy chodzi o gracza, y nie ma znaczenia
-albo x = -1 to znaczy ze zagrywamy odrzucenie karty, y nie ma znaczenia
-karta -> kod karty do zagrania/odrzucenia
-czy -> 0 to nie obracamy tunelu; 1 to obracamy tunel
+-> co przyjmuje ruch?  
+wspolrzedne x,y -> albo te z planszy, czyli odpowiednio od 0 do 6 i od 0 do 10  
+albo x od 20 do 20+liczba graczy i wtedy chodzi o gracza, y nie ma znaczenia  
+albo x = -1 to znaczy ze zagrywamy odrzucenie karty, y nie ma znaczenia  
+karta -> kod karty do zagrania/odrzucenia  
+czy -> 0 to nie obracamy tunelu; 1 to obracamy tunel  
 i to wszystko jest przy zalozeniu ze gracz zrobil dobrze
 jak cos sie nie zgadza, np ktos probuje odblokowac latarnie klikajac pole na planszy to wiazace jest jaka karte chce zagrac. tzn dam mu komunikat zagraj tę kartę na graczu, a nie komunikat na tym polu zagrywa się karty tuneli.
-Potem jest jakis warunek konca, ze albo odkryto zloto, albo reka tego, kto wlasnie ma grac, jest pusta
-Jesli on zajdzie, to wywoluje funkcje przyznajaca punkty i mozna zaczac nowa runde. 
-Problem jest taki, ze ja nie moge tego zrealizowac returnami.
+Potem jest jakis warunek konca, ze albo odkryto zloto, albo reka tego, kto wlasnie ma grac, jest pusta  
+Jesli on zajdzie, to wywoluje funkcje przyznajaca punkty i mozna zaczac nowa runde.   
+Problem jest taki, ze ja nie moge tego zrealizowac returnami.  
 Na razie w tym kodzie jest ich mnostwo, ale czesc z nich to niekoniecznie powinny byc returny tylko bardziej 'wyslij do Kuby i kontynuuj'; tak samo brakuje zbierania danych od Kuby na biezaco + jakiegos czekania na nie.
-No i teraz pytanie - jak to zrobic? czy uda sie to tak dostosowac, czy po prostu zrobic ten kod jako funkcje ktore robia legitne returny i Kuba sam je sobie bedzie wywolywal jak bedzie chcial?
+No i teraz pytanie - jak to zrobic? czy uda sie to tak   dostosowac, czy po prostu zrobic ten kod jako funkcje ktore robia legitne returny i Kuba sam je sobie bedzie wywolywal jak bedzie chcial?
 
 ## OPIS TABLIC:
 
