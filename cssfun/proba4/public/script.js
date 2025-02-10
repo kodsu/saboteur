@@ -26,6 +26,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+
+socket.on("init_cards", ({ n, cards }) => {
+    const bottomCardsContainer = document.querySelector(".bottom-cards");
+    bottomCardsContainer.innerHTML = ""; // Czyścimy stare karty
+
+    cards.forEach(cardName => {
+        const cardElem = document.createElement("div");
+        cardElem.classList.add("card");
+        cardElem.style.backgroundImage = `url('/pictures/${cardName}')`;
+        cardElem.dataset.image = cardName;
+
+        cardElem.addEventListener("click", function() {
+            selectCard(cardElem);
+        });
+
+        bottomCardsContainer.appendChild(cardElem);
+    });
+})
+
 function selectCard(cardElem) {
     // Reset poprzedniego wyboru
     if (selectedCard.element) {
@@ -110,6 +129,62 @@ socket.on("update_board", (boardState) => {
         field.style.backgroundImage = `url('${data.cardImage}')`;
     }
 });
+
+
+
+// robienie kolorów obramówek graczy. 
+socket.on("update_border", ({ playerId, isGreen }) => {
+    console.log(`Zmiana obramowania dla gracza ${playerId}, zielone: ${isGreen}`);
+    
+    const columns = document.querySelectorAll('.circle-buttons');
+    
+    let columnIndex, playerIndex;
+    if (playerId <= 5) {
+        columnIndex = 0; // Pierwsza kolumna (gracze 1-5)
+        playerIndex = playerId - 1;
+    } else {
+        columnIndex = 1; // Druga kolumna (gracze 6-10)
+        playerIndex = playerId - 6;
+    }
+    
+    const players = columns[columnIndex].querySelectorAll('.player');
+    
+    if (players && players.length > playerIndex) {
+        const playerButton = players[playerIndex].querySelector('.big-button');
+        if (playerButton) {
+            playerButton.style.borderColor = isGreen ? "green" : "yellow";
+        }
+    }
+})
+
+socket.on("update_cards_left", ({ playerId, number }) => {
+    console.log(`Aktualizacja kart dla gracza ${playerId}, nowa liczba: ${number}`);
+    
+    const columns = document.querySelectorAll('.circle-buttons');
+    
+    let columnIndex, playerIndex;
+    if (playerId <= 5) {
+        columnIndex = 0;
+        playerIndex = playerId - 1;
+    } else {
+        columnIndex = 1;
+        playerIndex = playerId - 6;
+    }
+    
+    const players = columns[columnIndex].querySelectorAll('.small-buttons');
+    
+    if (players && players.length > playerIndex) {
+        const cardCountElement = players[playerIndex].querySelector('.card-count');
+        if (cardCountElement) {
+            cardCountElement.textContent = number;
+            // Dodaj animację dla lepszej widoczności zmian
+            cardCountElement.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cardCountElement.style.transform = 'scale(1)';
+            }, 200);
+        }
+    }
+}); 
 
 //(Opcjonalnie) jeśli chcesz, by serwer rozsyłał potwierdzenie obrotu, możesz dodać listener:
 socket.on("card_rotated", ({ cardImage, rotation }) => {

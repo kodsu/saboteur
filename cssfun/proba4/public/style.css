@@ -72,12 +72,9 @@ body {
     background-size: cover;
     background-position: center;
     cursor: pointer;
-    border: 4px solid yellow;
+    border: 4px solid; 
 }
 
-.big-button.green {
-    border-color: green !important;
-}
 
 .circle-buttons .nickname {
     padding: 5px;
