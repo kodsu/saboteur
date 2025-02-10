@@ -1,0 +1,8 @@
+<%- include('base_header', {title: "Profil"}); %>
+  <label for="name">Nazwa użytkownika: </label> <p id="name"><%= name %></p>
+  <br>
+  <label for="games">Rozegrane gry: </label> <p id="games"><%= games %></p>
+  <br>
+  <label for="wins">Wygrane gry: </label> <p id="wins"><%= wins %></p>
+  <br>
+<%- include('footer', {script: "/redirectButtons.js"}); %>
