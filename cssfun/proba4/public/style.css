@@ -33,7 +33,7 @@ body {
 
 .grid button { 
     min-width: 40px;
-    min-height: 60px;
+    min-height: 100px;
     background-size: cover;
     background-position: center;
     border: 1px solid black;
@@ -250,14 +250,14 @@ body {
     cursor: pointer;
 }
 
-.bottom-cards .card:active {
+/* .bottom-cards .card:active {
     transform: scale(1.5);
     z-index: 10;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1.5);
-}
+} */
 
 .round-info {
     position: absolute;

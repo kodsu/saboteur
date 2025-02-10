@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plansza z przyciskami</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="script.js" defer></script>
+    <script src="script.js" defer></script> 
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -224,11 +225,10 @@
         </div>
     </div>
     <button id="rotate-btn" ></button>
-    <!-- Karty na dole -->
     
     <div class="preview-container" style="display: none;">
         <div class="preview-card"></div>
-        <button id="rotate-btn" onclick="rotateCard()" disabled>Obróć kartę</button>
+        <button id="rotate-btn" onclick="rotateCard()">Obróć kartę</button>
     </div>
 
     <!-- Karty na dole -->
@@ -247,16 +247,12 @@
 
 <!-- Przycisk do obracania – możesz umieścić go tam, gdzie uważasz za stosowne (np. obok dolnych kart) -->
 <div class="bottom-actions" style="position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%);">
-    <button id="rotate-btn" onclick="rotateCard()" disabled>Obróć kartę</button>
   </div>
 
-    <!-- Reszta elementów bez zmian -->
-    <!-- ... -->
-
-    <!-- Podgląd karty z przyciskiem obrotu -->
+   
     <div class="preview-container" style="display: none;">
         <div class="preview-card"></div>
-        <button id="rotate-btn" onclick="rotateCard()" disabled>Obróć kartę</button>
+        <button id="rotate-btn" onclick="rotateCard()" >Obróć kartę</button>
     </div>
 
     <!-- Karty na dole -->
