@@ -9,7 +9,7 @@ const app = express();
 const httpServer = createServer(app);
 
 const sessionMiddleware = session({
-  secret: "changeit",
+  secret: "gd46sdf5",
   resave: true,
   saveUninitialized: true,
 });
@@ -28,54 +28,83 @@ app.get("/", (req, res) => res.render("index"));
 app.get("/room/:n", (req, res) => {
   res.render("room", {"n":req.params.n})
 });
+app.get("/login", (req, res) => {
+  res.render("login")
+});
 
-let roomnums = new Set([]);
-let players = {}
-let names = new Set([]);
+app.get("/register", (req, res) => {
+  res.render("register")
+});
 
-const characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+class Player {
+  constructor(sid, name, roomid) {
+    this.sid = sid
+    this.name = name;
+    this.roomid = roomid
+  }
+};
+
+let sids = new Set()
+let roomids = new Set()
+let players = new Map()
+let sid_to_player = new Map()
+let names = new Set()
 
 function rand_name() {
   let s = "Guest "
-  for(let i=0; i<5; i++)
-    s += characters[Math.floor(Math.random() * characters.length)]
-  return s
+  let i = 0
+  while(names.has(s+i))
+    i+=1
+  return s+i
 }
 
 function smallest() {
   let i=1;
   while(true) {
-    if(!roomnums.has(i))
+    if(!roomids.has(i))
       return i
     i+=1
   }
 }
 
 io.on("connect", socket => {
-  const sessionId = socket.request.session.id;
-  console.log(sessionId)
-  socket.join(sessionId);
+  const sid = socket.request.session.id;
+  if(!sids.has(sid)) {
+    let name = rand_name()
+    names.add(name)
+    sid_to_player[sid] = new Player(sid, name, null);
+    sids.add(sid)
+  }
+  let player = sid_to_player[sid]
+  let name = player.name
 
-  for(const n of roomnums) {
+  for(const n of roomids) {
     socket.emit("newRoom", n);
   }
-  
+
   socket.on("newRoom", () => {
     const n = smallest()
-    players[n] = []
+    players[n] = new Set()
     socket.emit("setRoom", n)
     socket.broadcast.emit("newRoom", n);
-    roomnums.add(n)
+    roomids.add(n)
   })
   socket.on("joinRoom", n => {
-    const name = rand_name()
-    console.log("join", n)
-    for(const player of players[n]) {
-      socket.emit("newPlayer", player);
-    }
-    players[n].push(sessionId)
-    socket.to(`Room${n}`).emit("newPlayer", sessionId);
     socket.join(`Room${n}`);
+    if(!players[n])
+      players[n] = new Set()
+    for(const id of players[n]) {
+      socket.emit("newPlayer", sid_to_player[id].name);
+    }
+    if(!players[n].has(sid)) {
+      players[n].add(sid)
+      io.to(`Room${n}`).emit("newPlayer", name);
+    }
+    sid_to_player[sid].roomid = n
+  })
+  socket.on("leaveRoom", () => {
+    io.to(`Room${sid_to_player[sid].roomid}`).emit("delPlayer", player.name);
   })
 });
 
