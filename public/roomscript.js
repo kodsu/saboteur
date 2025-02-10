@@ -1,9 +1,12 @@
 const playerList = document.querySelector("#playerList")
 const leaveButton = document.querySelector("#leaveRoom")
+const roomList = document.querySelector("#roomList")
+const startButton = document.querySelector("#start")
 
 const socket = io();
 
 let players = new Map()
+let n = window.location.pathname.match(/[0-9]+/)[0]
 
 socket.on("newPlayer", (name) => {
   console.log("join")
@@ -24,4 +27,13 @@ leaveButton.addEventListener("click", () => {
   window.location.href = "/"
 });
 
-socket.emit("joinRoom", window.location.pathname.match(/[0-9]+/)[0])
+startButton.addEventListener("click", () => {
+  socket.emit("start");
+  window.location.href = "/game/" + n
+});
+
+socket.on("start", () => {
+  window.location.href = "/game/" + n
+})
+
+socket.emit("joinRoom", n)

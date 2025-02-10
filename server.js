@@ -36,8 +36,16 @@ app.use(sessionMiddleware)
 io.engine.use(sessionMiddleware);
 
 app.get("/", (req, res) => res.render("index"));
+app.get("/game/:n", (req, res) => {
+  res.render("game")
+});
+
 app.get("/room/:n", (req, res) => {
-  res.render("room", {"n":req.params.n})
+  console.log(roomids, req.params.n)
+  if(roomids.has(Number(req.params.n)))
+    res.render("room", {"n":req.params.n})
+  else
+    res.send('<img src="https://http.cat/404" />')
 });
 app.get("/login", (req, res) => {
   res.render("login", ok="")
@@ -66,8 +74,6 @@ app.post("/register", (req, res) => {
   stmt.finalize()
   res.render("register")
 });
-
-
 
 class Player {
   constructor(sid, name, roomid, guest) {
@@ -138,6 +144,10 @@ io.on("connect", socket => {
   })
   socket.on("leaveRoom", () => {
     io.to(`Room${sid_to_player[sid].roomid}`).emit("delPlayer", player.name);
+  })
+
+  socket.on("start", () => {
+    socket.to(`Room${sid_to_player[sid].roomid}`).emit("start")
   })
 });
 
