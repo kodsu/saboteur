@@ -1,10 +1,11 @@
 <%- include('header', {title: "Logowanie"}); %>
-  <form>
+  <form method="post">
     <label for="fname">Username:</label><br>
-    <input type="text" id="username" name="username"><br>
+    <input type="text" id="name" name="name"><br>
     <label for="password">Password:</label><br>
     <input type="text" id="password" name="password">
     <input type="submit" value="Submit">
   </form>
   <button id="register">Zarejestruj się</button>
+  <label><%= ok %></label>
 <%- include('footer', {script: "/redirectButtons.js"}); %>

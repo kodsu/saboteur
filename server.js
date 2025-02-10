@@ -8,6 +8,13 @@ const port = 80;
 const app = express();
 const httpServer = createServer(app);
 
+const sqlite3 = require('sqlite3').verbose()
+const db = new sqlite3.Database('users.db')
+
+db.serialize(() => {
+  db.run('CREATE TABLE IF NOT EXISTS users (name TEXT, password TEXT)')
+})
+
 const sessionMiddleware = session({
   secret: "gd46sdf5",
   resave: true,
@@ -15,6 +22,10 @@ const sessionMiddleware = session({
 });
 
 app.use(sessionMiddleware);
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 const io = new Server(httpServer);
 
@@ -29,19 +40,41 @@ app.get("/room/:n", (req, res) => {
   res.render("room", {"n":req.params.n})
 });
 app.get("/login", (req, res) => {
-  res.render("login")
+  res.render("login", ok="")
+});
+
+app.post("/login", (req, res) => {
+  db.get('SELECT name, password FROM users WHERE (name = ? AND password = ?)', req.body.name, req.body.password, (err, dbres) =>{
+    if(dbres) {
+      sid_to_player[req.sessionID].name = req.body.name
+      sid_to_player[req.sessionID].guest = false
+      res.render("login", {ok:"ok"})
+    }
+    else
+      res.render("login", {ok:"wrong"})
+  })
 });
 
 app.get("/register", (req, res) => {
   res.render("register")
 });
 
+app.post("/register", (req, res) => {
+  console.log(req.body)
+  const stmt = db.prepare('INSERT INTO users VALUES (?, ?)')
+  stmt.run(req.body.name, req.body.password)
+  stmt.finalize()
+  res.render("register")
+});
+
+
 
 class Player {
-  constructor(sid, name, roomid) {
+  constructor(sid, name, roomid, guest) {
     this.sid = sid
     this.name = name;
     this.roomid = roomid
+    this.guest = guest
   }
 };
 
@@ -73,7 +106,7 @@ io.on("connect", socket => {
   if(!sids.has(sid)) {
     let name = rand_name()
     names.add(name)
-    sid_to_player[sid] = new Player(sid, name, null);
+    sid_to_player[sid] = new Player(sid, name, null, true);
     sids.add(sid)
   }
   let player = sid_to_player[sid]
