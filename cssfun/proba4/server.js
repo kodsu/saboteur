@@ -26,7 +26,8 @@ app.use('/pictures', express.static(path.join(__dirname, 'public', 'pictures')))
 // Stan planszy (początkowo pusty)
 let boardState = {};
 let userCards = {}; // Przechowujemy karty dla każdego gracza
-let playerBorders = {};
+let playerBorders = {}; 
+// let NumberofPlayers = 10;
 
 // Lista dostępnych kart
 const availableCards = [
@@ -37,33 +38,24 @@ io.on("connection", (socket) => {
     
     console.log("Użytkownik połączony:", socket.id);
     
-    // socket.on("set_border", ({ playerId, isGreen }) => {
-    //     console.log(`Zmiana obramowania dla gracza ${playerId}: ${isGreen ? "zielone" : "brak"}`);
+    socket.on("set_border", ({ playerId, isGreen }) => {
+        console.log(`Zmiana obramowania dla gracza ${playerId}: ${isGreen ? "zielone" : "brak"}`);
         
-    //     playerBorders[playerId] = isGreen;
+        playerBorders[playerId] = isGreen;
     
-    //     io.emit("update_border", { playerId, isGreen });
-    // });
-    game.init(10);
-    socket.on("move", (move) => {
-        ruch(move)
-        render(game)
-        if(game.check_end()) {
-            game.koniec()
-            game.turn++;
-            if(game.turn == 3)
-                io.emit("end")
-        }
-    });
+        io.emit("update_border", { playerId, isGreen });
+    }); 
+
     
-    let GameStarter = 9; 
-    for(let i = 1; i <= 10; i++){ 
-        socket.emit("update_border", {playerId: i, isGreen: 0});  
-        socket.emit("update_cards_left", {playerId: i, number: i}); 
-        socket.emit("update_blocks", {playerId: i, mask: i%8}); 
-    }
-    socket.emit("update_gold", {gold:1}); 
-    socket.emit("update_border", {playerId: GameStarter, isGreen: 1});  
+    
+    // let GameStarter = 9; 
+    // for(let i = 1; i <= 10; i++){ 
+    //     socket.emit("update_border", {playerId: i, isGreen: 0});  
+    //     socket.emit("update_cards_left", {playerId: i, number: i}); 
+    //     socket.emit("update_blocks", {playerId: i, mask: i%8}); 
+    // }
+    // socket.emit("update_gold", {gold:1}); 
+    // socket.emit("update_border", {playerId: GameStarter, isGreen: 1});  
 
     
     socket.on("init_cards", ({ n, cards }) => {
@@ -79,7 +71,7 @@ io.on("connection", (socket) => {
             cardElem.addEventListener("click", function() {
                 selectCard(cardElem);
             });
-
+                
             bottomCardsContainer.appendChild(cardElem);
         });
     });
@@ -106,12 +98,35 @@ io.on("connection", (socket) => {
             userCards[socket.id].splice(index, 1); 
         } 
         console.log(name, userCards[socket.id]); 
+        
         io.emit("init_cards", { n: userCards[socket.id].length, cards: userCards[socket.id] });
-        io.emit("update_board", boardState);
+        io.emit("update_board", boardState); 
     });
 
 
-   
+   function full_layout(kto, plansza, rece, blokady, k){  // k in [0,9]
+        let NumberofPlayers = rece.length; 
+        for(let i = 1; i <= NumberofPlayers; i++) { 
+            socket.emit("update_border", {playerId: i, isGreen: 0}); 
+            socket.emit("update_cards_left", {playerId: i, number: rece[i-1].length}); 
+        } 
+        for(let i = 0; i < NumberofPlayers; i++){ 
+            let mask_m = 1*blokady[3*i] + 2 * blokady[3*i + 1] + 4*blokady[3*i + 2]; 
+            io.emit("update_blocks", {playerId: i/3 + 1, mask: mask_m}); 
+        }
+        socket.emit("update_border", {playerId: kto+1, isGreen: 1}); 
+        const updatedCards = rece[k].map(card => card + ".png");
+        io.emit("init_cards", {n: updatedCards.length, cards: updatedCards });   
+        for(let i = 0; i < 7; i++){ 
+            for(let j = 0; j < 11; j++){ 
+                socket.emit("place_card", {
+                    fieldId: 11*i + j,
+                    cardImage: "url(/pictures/" + plansza[i][j] +".png)",
+                    rotation: 0
+                });
+            }
+        } 
+   }
 
     socket.on("rotate_card", ({ cardImage, rotation }) => {
         console.log(`Otrzymano informację o obrocie karty ${cardImage} na ${rotation} stopni`);
@@ -128,3 +143,81 @@ const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Serwer działa na http://localhost:${PORT}`);
 });
+
+
+
+
+
+// testowy call full-layoutu: 
+// full_layout(7, [
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'R00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'S04', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'R00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'R00', 'F00'
+    //     ],
+    //     [
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00', 'F00',
+    //       'F00', 'F00'
+    //     ]
+    //   ], [
+    //     [ 'B02', 'B05', 'E07', 'E02' ],
+    //     [ 'B06', 'E12', 'B01', 'E03' ],
+    //     [ 'E01', 'E07', 'E03', 'E09' ],
+    //     [ 'E15', 'E05', 'E05', 'E15' ],
+    //     [ 'E06', 'E03', 'E01', 'E11' ],
+    //     [ 'E16', 'B07', 'B06', 'E13' ],
+    //     [ 'E07', 'E06', 'B03', 'E05' ],
+    //     [ 'E06', 'E02', 'E04', 'E06' ],
+    //     [ 'B04', 'E05', 'E01', 'E14' ],
+    //     [ 'E01', 'E07', 'E14', 'B05' ]
+    //   ], [
+    //     0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //     0, 0, 0
+    //   ], 8); 
+    // console.log("Zrobiona robota!\n"); 
+    // game.init(10);
+    // socket.on("move", (move) => {
+    //     ruch(move)
+    //     render(game)
+    //     if(game.check_end()) {
+    //         game.koniec()
+    //         game.turn++;
+    //         if(game.turn == 3)
+    //             io.emit("end")
+    //     }
+    // });
