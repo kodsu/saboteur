@@ -41,7 +41,6 @@ app.get("/", (req, res) => {
     res.render("index", {"guest":false, "text":"Zalogowano pomyślnie"})
   }
   else {
-    console.log(sid_to_player.get(req.sessionID))
     res.render("index", {"guest":sid_to_player.get(req.sessionID)?.guest, "text":""})
   }
 });
@@ -50,7 +49,6 @@ app.get("/game/:n", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  console.log("???", sid_to_player.get(req.sessionID)?.name)
   db.get('SELECT name, wins, games FROM users WHERE name = ?', sid_to_player.get(req.sessionID)?.name, (err, dbres) =>{
     if(dbres) {
       res.render("profile", dbres)
@@ -139,7 +137,6 @@ function smallest() {
 io.on("connect", socket => {
   const sid = socket.request.session.id;
   if(!sid_to_player.has(sid)) {
-    console.log("new")
     let name = rand_name()
     names.add(name)
     sid_to_player.set(sid, new Player(sid, name, null, true));
@@ -159,24 +156,38 @@ io.on("connect", socket => {
     roomids.add(n)
   })
   socket.on("joinRoom", n => {
+    n = Number(n)
     socket.join(`Room${n}`);
     if(!players[n])
       players[n] = new Set()
     for(const id of players[n]) {
       socket.emit("newPlayer", sid_to_player.get(id).name);
     }
+    if(player.roomid) {
+      players[player.roomid].delete(sid)
+      if(players[player.roomid].size == 0) {
+        roomids.delete(player.roomid)
+        io.emit("delRoom", player.roomid)
+      }
+      io.to(`Room${player.roomid}`).emit("delPlayer", player.name);
+    }
     if(!players[n].has(sid)) {
       players[n].add(sid)
       io.to(`Room${n}`).emit("newPlayer", name);
     }
-    sid_to_player.get(sid).roomid = n
+    player.roomid = n
   })
   socket.on("leaveRoom", () => {
-    io.to(`Room${sid_to_player.get(sid).roomid}`).emit("delPlayer", player.name);
+    players[player.roomid].delete(sid)
+    io.to(`Room${player.roomid}`).emit("delPlayer", player.name);
+    if(players[player.roomid].size == 0) {
+      roomids.delete(player.roomid)
+      io.emit("delRoom", player.roomid)
+    }
   })
 
   socket.on("start", () => {
-    socket.to(`Room${sid_to_player.get(sid).roomid}`).emit("start")
+    socket.to(`Room${player.roomid}`).emit("start")
   })
 });
 
