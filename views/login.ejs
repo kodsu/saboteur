@@ -1,11 +1,11 @@
-<%- include('header', {title: "Logowanie"}); %>
-  <form method="post">
-    <label for="fname">Username:</label><br>
-    <input type="text" id="name" name="name"><br>
-    <label for="password">Password:</label><br>
-    <input type="text" id="password" name="password">
-    <input type="submit" value="Submit">
+<%- include('base_header', {title: "Logowanie"}); %>
+<div class="">
+  <form method="post" class="login-scr">
+    <input type="text" id="name" name="name" placeholder="Nazwa Użytkownika"><br>
+    <input type="text" id="password" name="password" placeholder="Hasło"><br>
+    <input type="submit" class="btn" name="op" value="Zaloguj się">
+    <input type="submit" class="btn" name="op" value="Zarejestruj się">
   </form>
-  <button id="register">Zarejestruj się</button>
   <label><%= ok %></label>
+</div>
 <%- include('footer', {script: "/redirectButtons.js"}); %>
