@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const session = require("express-session");
 const GameSupervisor = require("./logic-class");
 
-const port = 80;
+const port = 3000;
 
 const app = express();
 const httpServer = createServer(app);
@@ -247,7 +247,8 @@ io.on("connect", socket => {
       });
   });
  
-  // Obsługa umieszczania karty na planszy
+  // Obsługa umieszczania karty na planszy 
+ globalRotation = 0; 
   socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
     let game = games.get(player.roomid)
       // fieldId, cardImage, rotation -> 
@@ -266,13 +267,13 @@ io.on("connect", socket => {
       fieldId = parseInt(fieldId.slice(6, fieldId.length))
       let result = 0;     
       if(fieldId <= 90){
-          console.log(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0)
-          result = game.ruch(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0); 
+          console.log(Math.floor(fieldId / 11), fieldId %11, name, globalRotation, 0)
+          result = game.ruch(Math.floor(fieldId / 11), fieldId %11, name, globalRotation, 0); 
       }
       else 
       { 
-          console.log(fieldId - 81, 0, name, rotation)
-          result = game.ruch(fieldId - 81, 0, name, rotation, 0);   
+          console.log(fieldId - 81, 0, name, globalRotation)
+          result = game.ruch(fieldId - 81, 0, name, globalRotation, 0);   
       }  
       
       full_layout(result[0], result[1], result[2], result[3], player.turn);
@@ -283,12 +284,14 @@ io.on("connect", socket => {
           if(game.turn == 3)
               io.emit("end")
       }
-          
+    globalRotation = 0;  
       
   });
 
 // kto -- czyj ruch 
 // k -- czyje karty widac
+
+
  function full_layout(kto, plansza, rece, blokady, k){  // k in [0,9]
       console.log(kto, plansza, rece, blokady, k)
       let NumberofPlayers = rece.length; 
@@ -317,8 +320,7 @@ io.on("connect", socket => {
 
   socket.on("rotate_card", ({ cardImage, rotation }) => {
       console.log(`Otrzymano informację o obrocie karty ${cardImage} na ${rotation} stopni`);
-      // Jeśli chcesz, możesz tu wykonać dodatkowe operacje lub rozesłać event potwierdzający:
-      // io.emit("card_rotated", { cardImage, rotation });
+      globalRotation = 1 - globalRotation; 
   });
 
   socket.on("disconnect", () => {
