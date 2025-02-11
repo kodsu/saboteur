@@ -9,6 +9,7 @@ const GameSupervisor = require("./logic-class");
 const { render } = require('ejs');
 const { result } = require('lodash');
 
+
 let game = new GameSupervisor()
 game.init_game()
 const app = express();
@@ -30,10 +31,6 @@ let userCards = {}; // Przechowujemy karty dla każdego gracza
 let playerBorders = {}; 
 // let NumberofPlayers = 10;
 
-// Lista dostępnych kart
-const availableCards = [
-    "E03.png", "E04.png", "E05.png", "E06.png", "E07.png", "E08.png"
-];
 
 io.on("connection", (socket) => {
     
@@ -79,12 +76,25 @@ io.on("connection", (socket) => {
     });
 
    
+    
     let result = game.init(10)  
-    // result[4] -- roles 
-   //  console.log("initial rzeczy -- ", result)
+    // result[4] -- roles   
+    globalRoles = result[3]; 
+    console.log(result);
+    console.log(globalRoles);  
+    
+    // [0, 1, 0, 1, ]
+    //  console.log("initial rzeczy -- ", result) 
+
+    
+ 
+    console.log(globalRoles)
     full_layout(result[0], result[1], result[2], result[3], result[0]);  
-   
-    // Obsługa umieszczania karty na planszy
+    // jak zrobić result[4] roles 
+    
+    
+    let currentRotation = 0; 
+
     socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
         // fieldId, cardImage, rotation -> 
         /* 
@@ -93,48 +103,53 @@ io.on("connection", (socket) => {
         + 1 latarnia 
         
         + 2 wozek */
-          
+        let rotation2 = currentRotation; // Uwaga rotation z argumentu to bullshit licze wywolania lokalnie 
+        // pomiedzy rotate_card i set_card
         const start = cardImage.length-7; // Fixed start index for the card name
         const end = cardImage.length-4;   // Fixed end index for the card name
         const name = cardImage.slice(start, end);
         fieldId = parseInt(fieldId.slice(6, fieldId.length))
         let result = 0;     
         if(fieldId <= 90){
-            console.log(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0)
-            result = game.ruch(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0); 
+            console.log(Math.floor(fieldId / 11), fieldId %11, name, rotation2, 0)
+            result = game.ruch(Math.floor(fieldId / 11), fieldId %11, name, rotation2, 0); 
         }
         else 
         { 
-            console.log(fieldId - 81, 0, name, rotation)
-            result = game.ruch(fieldId - 81, 0, name, rotation, 0);   
+            console.log(fieldId - 81, 0, name, rotation2)
+            result = game.ruch(fieldId - 81, 0, name, rotation2, 0);   
         }  
         
         full_layout(result[0], result[1], result[2], result[3], result[0]);
- 
+        currentRotation = 0; 
         if(game.check_end()) {
             game.koniec()
             game.turn++;
             if(game.turn == 3)
-                io.emit("end")
-        }
-            
-        
-    });
+            io.emit("end")
+    }
+    
+    
+});
 
 // kto -- czyj ruch 
 // k -- czyje karty widac
-   function full_layout(kto, plansza, rece, blokady, k){  // k in [0,9]
-        let NumberofPlayers = rece.length; 
-        for(let i = 1; i <= NumberofPlayers; i++) { 
-            socket.emit("update_border", {playerId: i, isGreen: 0}); 
-            socket.emit("update_cards_left", {playerId: i, number: rece[i-1].length}); 
-        } 
-        for(let i = 0; i < NumberofPlayers; i++){ 
-            let mask_m = 1*blokady[3*i] + 2 * blokady[3*i + 1] + 4*blokady[3*i + 2]; 
-            io.emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
-        }
-        socket.emit("update_border", {playerId: kto+1, isGreen: 1}); 
-        const updatedCards = rece[k].map(card =>  card + ".png");
+function full_layout(kto, plansza, rece, blokady, k){  // k in [0,9]
+    let NumberofPlayers = rece.length; 
+    for(let i = 1; i <= NumberofPlayers; i++) { 
+        socket.emit("update_border", {playerId: i, isGreen: 0}); 
+        socket.emit("update_cards_left", {playerId: i, number: rece[i-1].length}); 
+    } 
+    for(let i = 0; i < NumberofPlayers; i++){ 
+        let mask_m = 1*blokady[3*i] + 2 * blokady[3*i + 1] + 4*blokady[3*i + 2]; 
+        io.emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
+    }
+    socket.emit("update_border", {playerId: kto+1, isGreen: 1});  
+
+    socket.emit('set_image', globalRoles[k] + ".png"); 
+
+        const updatedCards = rece[k].map(card =>  card + ".png"); 
+        
         io.emit("init_cards", {n: updatedCards.length, cards: updatedCards });   
         // co sie dzieje ? 
         for(let i = 0; i < 7; i++){ 
@@ -149,7 +164,8 @@ io.on("connection", (socket) => {
    }
 
     socket.on("rotate_card", ({ cardImage, rotation }) => {
-        console.log(`Otrzymano informację o obrocie karty ${cardImage} na ${rotation} stopni`);
+        console.log(`Otrzymano informację o obrocie karty ${cardImage} na ${180-rotation} stopni`); 
+        currentRotation = 1 - currentRotation; 
         // Jeśli chcesz, możesz tu wykonać dodatkowe operacje lub rozesłać event potwierdzający:
         // io.emit("card_rotated", { cardImage, rotation });
     });
