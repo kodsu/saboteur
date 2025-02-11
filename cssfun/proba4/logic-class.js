@@ -455,51 +455,35 @@ class GameSupervisor {
       this.plansza[px][py] = "S01";
     } else if (this.skarby[index] == "S02") {
       // If statement from original code
-      if (
-        ((this.plansza[0][9][0] != "F" &&
-          this.tunele[this.plansza[0][9]][2] == 1) ||
-          (this.plansza[1][10][0] != "F" &&
-            this.tunele[this.plansza[1][10]][3] == 0) ||
-          (this.plansza[2][9][0] != "F" &&
-            this.tunele[this.plansza[2][9]][2] == 0) ||
-          (this.plansza[1][8][0] != "F" &&
-            this.tunele[this.plansza[1][8]][1] == 1)) &&
-        ((this.plansza[0][9][0] == "F" ||
-          this.tunele[this.plansza[0][9]][2] == 1) ||
-          (this.plansza[1][10][0] == "F" ||
-            this.tunele[this.plansza[1][10]][3] == 0) ||
-          (this.plansza[2][9][0] == "F" ||
-            this.tunele[this.plansza[2][9]][2] == 0) ||
-          (this.plansza[1][8][0] == "F" ||
-            this.tunele[this.plansza[1][8]][1] == 1))
-      ) {
-        this.plansza[px][py] = "S22";
-      } else {
-        this.plansza[px][py] = "S02";
+      let a=x
+      let b=y
+      x=px
+      y=py
+      if (((y==10 || !(this.plansza[x][y+1] in this.tunele) || this.tunele[this.plansza[x][y+1]][3]==this.tunele["S22"][1])&&(y==0 || !(this.plansza[x][y-1] in this.tunele) || this.tunele[this.plansza[x][y-1]][1]==this.tunele["S22"][3])&&(x==6 || !(this.plansza[x+1][y] in this.tunele) || this.tunele[this.plansza[x+1][y]][0]==this.tunele["S22"][2])&&(x==0 || !(this.plansza[x-1][y] in this.tunele) || this.tunele[this.plansza[x-1][y]][2]==this.tunele["S22"][0]))&&(y<10 && this.tunele.hasOwnProperty(this.plansza[x][y+1]) && this.tunele[this.plansza[x][y+1]][3]!=this.tunele["S02"][1])||(y>0 && this.tunele.hasOwnProperty(this.plansza[x][y-1]) && this.tunele[this.plansza[x][y-1]][1]!=this.tunele["S02"][3])||(x<6 && this.tunele.hasOwnProperty(this.plansza[x+1][y]) && this.tunele[this.plansza[x+1][y]][0]!=this.tunele["S02"][2])||(x>0 && this.tunele.hasOwnProperty(this.plansza[x-1][y]) && this.tunele[this.plansza[x-1][y]][2]!=this.tunele["S02"][0]))
+      {
+          this.plansza[px][py]="S22"
       }
+      else
+      {
+          this.plansza[px][py]="S02"
+      }
+      x=a
+      y=b
     } else {
-      if (
-        ((this.plansza[0][9][0] != "F" &&
-          this.tunele[this.plansza[0][9]][2] == 1) ||
-          (this.plansza[1][10][0] != "F" &&
-            this.tunele[this.plansza[1][10]][3] == 1) ||
-          (this.plansza[2][9][0] != "F" &&
-            this.tunele[this.plansza[2][9]][2] == 0) ||
-          (this.plansza[1][8][0] != "F" &&
-            this.tunele[this.plansza[1][8]][1] == 0)) &&
-        ((this.plansza[0][9][0] == "F" ||
-          this.tunele[this.plansza[0][9]][2] == 1) ||
-          (this.plansza[1][10][0] == "F" ||
-            this.tunele[this.plansza[1][10]][3] == 1) ||
-          (this.plansza[2][9][0] == "F" ||
-            this.tunele[this.plansza[2][9]][2] == 0) ||
-          (this.plansza[1][8][0] == "F" ||
-            this.tunele[this.plansza[1][8]][1] == 0))
-      ) {
-        this.plansza[px][py] = "S23";
-      } else {
-        this.plansza[px][py] = "S03";
+      let a=x
+      let b=y
+      x=px
+      y=py
+      if (((y==10 || !(this.plansza[x][y+1] in this.tunele) || this.tunele[this.plansza[x][y+1]][3]==this.tunele["S23"][1])&&(y==0 || !(this.plansza[x][y-1] in this.tunele) || this.tunele[this.plansza[x][y-1]][1]==this.tunele["S23"][3])&&(x==6 || !(this.plansza[x+1][y] in this.tunele) || this.tunele[this.plansza[x+1][y]][0]==this.tunele["S23"][2])&&(x==0 || !(this.plansza[x-1][y] in this.tunele) || this.tunele[this.plansza[x-1][y]][2]==this.tunele["S23"][0]))&&(y<10 && this.tunele.hasOwnProperty(this.plansza[x][y+1]) && this.tunele[this.plansza[x][y+1]][3]!=this.tunele["S03"][1])||(y>0 && this.tunele.hasOwnProperty(this.plansza[x][y-1]) && this.tunele[this.plansza[x][y-1]][1]!=this.tunele["S03"][3])||(x<6 && this.tunele.hasOwnProperty(this.plansza[x+1][y]) && this.tunele[this.plansza[x+1][y]][0]!=this.tunele["S03"][2])||(x>0 && this.tunele.hasOwnProperty(this.plansza[x-1][y]) && this.tunele[this.plansza[x-1][y]][2]!=this.tunele["S03"][0]))
+      {
+          this.plansza[px][py]="S23"
       }
+      else
+      {
+          this.plansza[px][py]="S03"
+      }
+      x=a
+      y=b
     }
   }
 
