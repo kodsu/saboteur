@@ -5,6 +5,11 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 
+const GameSupervisor = require("./logic-class");
+const { render } = require('ejs');
+
+let game = new GameSupervisor()
+game.init_game()
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -28,19 +33,29 @@ const availableCards = [
     "E03.png", "E04.png", "E05.png", "E06.png", "E07.png", "E08.png"
 ];
 
-
-
 io.on("connection", (socket) => {
+    
     console.log("Użytkownik połączony:", socket.id);
-
+    
     // socket.on("set_border", ({ playerId, isGreen }) => {
     //     console.log(`Zmiana obramowania dla gracza ${playerId}: ${isGreen ? "zielone" : "brak"}`);
         
     //     playerBorders[playerId] = isGreen;
-
+    
     //     io.emit("update_border", { playerId, isGreen });
     // });
-
+    game.init(10);
+    socket.on("move", (move) => {
+        ruch(move)
+        render(game)
+        if(game.check_end()) {
+            game.koniec()
+            game.turn++;
+            if(game.turn == 3)
+                io.emit("end")
+        }
+    });
+    
     let GameStarter = 9; 
     for(let i = 1; i <= 10; i++){ 
         socket.emit("update_border", {playerId: i, isGreen: 0});  
@@ -50,17 +65,17 @@ io.on("connection", (socket) => {
     socket.emit("update_gold", {gold:1}); 
     socket.emit("update_border", {playerId: GameStarter, isGreen: 1});  
 
-
+    
     socket.on("init_cards", ({ n, cards }) => {
         const bottomCardsContainer = document.querySelector(".bottom-cards");
         bottomCardsContainer.innerHTML = ""; // Czyścimy stare karty
-
+        
         cards.forEach(cardName => {
             const cardElem = document.createElement("div");
             cardElem.classList.add("card");
             cardElem.style.backgroundImage = `url('/pictures/${cardName}')`;
             cardElem.dataset.image = cardName;
-
+            
             cardElem.addEventListener("click", function() {
                 selectCard(cardElem);
             });

@@ -23,7 +23,6 @@ class GameSupervisor {
     // licznik czyja tura
     this.kto = 0;
     this.ile = 0;
-    this.turn = 0
 
     // do DFSa
     this.vstd = [];
@@ -599,33 +598,22 @@ class GameSupervisor {
   }
 
   // przebieg gry
-  gra(graczeQty, tury) {
+  init_game(graczeQty, tury) {
     this.zloto = [];
     this.wyniki = [];
     this.tasowanie_zlota();
     for (let i = 0; i < graczeQty; i++) {
       this.wyniki.push(0);
     }
-    for (let i = 0; i < tury; i++) {
-      this.init(graczeQty);
-      while (true) {
-        // Dostan info od Kuby (pseudo in-code placeholders x, y, karta, czy)
-        // In real usage, you’d gather it from client or other interface.
-        // Example placeholders for demonstration:
-        // let x = someX, y = someY, karta = someCard, czy = someBool
-        // this.ruch(x, y, karta, czy, this.kto);
-        // We'll simulate an end condition:
-        if (
-          this.plansza[1][9] == "S01" ||
-          this.plansza[3][9] == "S01" ||
-          this.plansza[5][9] == "S01" ||
-          this.rece[this.kto].length == 0
-        ) {
-          this.koniec();
-          break;
-        }
-      }
-    }
+  }
+
+  check_end() {
+    return (
+      this.plansza[1][9] == "S01" ||
+      this.plansza[3][9] == "S01" ||
+      this.plansza[5][9] == "S01" ||
+      this.rece[this.kto].length == 0
+    )
   }
 }
 
