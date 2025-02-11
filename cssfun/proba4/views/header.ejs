@@ -1,0 +1,6 @@
+<%- include('base_header', {title: title}); %>
+<%if (!guest) { %>
+  <button id="profile" class = "corner">Profil</button>
+<% } else{ %>  
+  <button id="login" class = "corner">Logowanie</button>
+<% } %>
