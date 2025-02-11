@@ -5,6 +5,9 @@ const session = require("express-session");
 const GameSupervisor = require("./logic-class");
 
 
+let game = new GameSupervisor()
+game.init_game()
+const port = 80;
 
 const app = express();
 const httpServer = createServer(app);
@@ -258,11 +261,13 @@ io.on("connect", socket => {
     // [0, 1, 0, 1, ]
     //  console.log("initial rzeczy -- ", result) 
 
+    
  
     console.log(globalRoles)
     full_layout(result[0], result[1], result[2], result[3], result[0]);  
     // jak zrobić result[4] roles 
-        
+    
+    
     let currentRotation = 0; 
 
     socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
