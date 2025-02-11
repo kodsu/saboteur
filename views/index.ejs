@@ -1,9 +1,11 @@
 <%- include('header', {title: "Pokoje"}); %>
+<div class="center">
   <div>
     <button id="newRoomButton">Nowy Pokój</button>
   </div>
-  <div id="roomList">
-  </div>
+  <label for="roomList">Lista Pokoi</label>
+  <div id="roomList"></div>
   <script src="/redirectButtons.js"></script>
   <label text><%= text %></label>
+</div>
 <%- include('footer', {script: "/script.js"}); %>

@@ -1,6 +1,7 @@
 .corner {
   position: absolute;
   left: 90%;
+  top:5%
 }
 
 button, .btn {
