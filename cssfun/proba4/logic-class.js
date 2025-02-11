@@ -271,25 +271,25 @@ class GameSupervisor {
     // this.tunele stores arrays of connectivity
     if (fst == 1 || this.tunele[this.plansza[x][y]][4] == 1) {
       // Right
-      if (y < 10 && this.plansza[x][y + 1] in this.tunele) {
+      if (y < 10 && this.plansza[x][y + 1] in this.tunele && this.vstd[x][y+1] == 0) {
         if (this.tunele[this.plansza[x][y]][1] == 1) {
           this.DFS(x, y + 1, 0);
         }
       }
       // Left
-      if (y > 0 && this.plansza[x][y - 1] in this.tunele) {
+      if (y > 0 && this.plansza[x][y - 1] in this.tunele && this.vstd[x][y-1] == 0) {
         if (this.tunele[this.plansza[x][y]][3] == 1) {
           this.DFS(x, y - 1, 0);
         }
       }
       // Down
-      if (x < 6 && this.plansza[x + 1][y] in this.tunele) {
+      if (x < 6 && this.plansza[x + 1][y] in this.tunele && this.vstd[x+1][y] == 0) {
         if (this.tunele[this.plansza[x][y]][0] == 1) {
           this.DFS(x + 1, y, 0);
         }
       }
       // Up
-      if (x > 0 && this.plansza[x - 1][y] in this.tunele) {
+      if (x > 0 && this.plansza[x - 1][y] in this.tunele && this.vstd[x-1][y] == 0) {
         if (this.tunele[this.plansza[x][y]][2] == 1) {
           this.DFS(x - 1, y, 0);
         }
@@ -376,21 +376,20 @@ class GameSupervisor {
     if (this.plansza[x][y][0] != "F") {
       return "Tunele można dokładać jedynie na pustych polach.";
     }
-    const tile = this.plansza[x][y];
     // check adjacency consistency
     if (
       (y < 10 &&
         this.plansza[x][y + 1] in this.tunele &&
-        this.tunele[this.plansza[x][y + 1]][3] != this.tunele[tile][1]) ||
+        this.tunele[this.plansza[x][y + 1]][3] != this.tunele[karta][1]) ||
       (y > 0 &&
         this.plansza[x][y - 1] in this.tunele &&
-        this.tunele[this.plansza[x][y - 1]][1] != this.tunele[tile][3]) ||
+        this.tunele[this.plansza[x][y - 1]][1] != this.tunele[karta][3]) ||
       (x < 6 &&
         this.plansza[x + 1][y] in this.tunele &&
-        this.tunele[this.plansza[x + 1][y]][2] != this.tunele[tile][0]) ||
+        this.tunele[this.plansza[x + 1][y]][2] != this.tunele[karta][0]) ||
       (x > 0 &&
         this.plansza[x - 1][y] in this.tunele &&
-        this.tunele[this.plansza[x - 1][y]][0] != this.tunele[tile][2])
+        this.tunele[this.plansza[x - 1][y]][0] != this.tunele[karta][2])
     ) {
       return "Tunel musi pasować do sąsiednich tuneli.";
     }
@@ -592,7 +591,12 @@ class GameSupervisor {
       }
     }
     // otherwise, just remove it from player's hand
-    this.rece[graczNaRuchu] = this.rece[graczNaRuchu].filter((it) => it != karta);
+    for (let j = 0; j < this.rece[graczNaRuchu].length; j++) {
+      if (this.rece[graczNaRuchu][j] == karta) {
+        this.rece[graczNaRuchu].splice(j,1)
+        break;
+      }
+    }
     this.kto = (this.kto + 1) % this.ile;
     return [this.kto, this.plansza, this.rece, this.blokady];
   }
