@@ -83,9 +83,6 @@ function selectCard(cardElem) {
     previewCard.style.backgroundImage = `url('${selectedCard.url}')`;
     previewCard.style.transform = 'rotate(0deg)';
     previewContainer.style.display = 'flex';
-    
-    // Aktywacja przycisku rotacji (przycisk musi mieć id="rotate-btn-main")
-    document.getElementById('rotate-btn-main').disabled = false;
 }
 
 function rotateCard() {
@@ -127,7 +124,7 @@ function placeCard(fieldId) {
         rotation: 0,
         originalParent: null
     };
-    document.getElementById('rotate-btn-main').disabled = true;
+//    document.getElementById('rotate-btn-main').disabled = true;
 }
 
 function getCleanBackgroundUrl(element) {
