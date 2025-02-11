@@ -284,13 +284,13 @@ class GameSupervisor {
       }
       // Down
       if (x < 6 && this.plansza[x + 1][y] in this.tunele && this.vstd[x+1][y] == 0) {
-        if (this.tunele[this.plansza[x][y]][0] == 1) {
+        if (this.tunele[this.plansza[x][y]][2] == 1) {
           this.DFS(x + 1, y, 0);
         }
       }
       // Up
       if (x > 0 && this.plansza[x - 1][y] in this.tunele && this.vstd[x-1][y] == 0) {
-        if (this.tunele[this.plansza[x][y]][2] == 1) {
+        if (this.tunele[this.plansza[x][y]][0] == 1) {
           this.DFS(x - 1, y, 0);
         }
       }
@@ -376,6 +376,10 @@ class GameSupervisor {
     if (this.plansza[x][y][0] != "F") {
       return "Tunele można dokładać jedynie na pustych polach.";
     }
+    if (czy==1 && (("E"+String((Number(karta[1])*10+Number(karta[2])+20)) in this.tunele)))
+    {
+        karta=("E"+String((Number(karta[1])*10+Number(karta[2])+20)))
+    }
     // check adjacency consistency
     if (
       (y < 10 &&
@@ -386,10 +390,10 @@ class GameSupervisor {
         this.tunele[this.plansza[x][y - 1]][1] != this.tunele[karta][3]) ||
       (x < 6 &&
         this.plansza[x + 1][y] in this.tunele &&
-        this.tunele[this.plansza[x + 1][y]][2] != this.tunele[karta][0]) ||
+        this.tunele[this.plansza[x + 1][y]][0] != this.tunele[karta][2]) ||
       (x > 0 &&
         this.plansza[x - 1][y] in this.tunele &&
-        this.tunele[this.plansza[x - 1][y]][0] != this.tunele[karta][2])
+        this.tunele[this.plansza[x - 1][y]][2] != this.tunele[karta][0])
     ) {
       return "Tunel musi pasować do sąsiednich tuneli.";
     }
