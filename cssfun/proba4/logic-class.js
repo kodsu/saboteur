@@ -429,14 +429,14 @@ class GameSupervisor {
         (x == 1 && y == 8 && this.tunele[this.plansza[x][y]][1] == 1)
       ) {
         this.revealSkarb(0, [1, 9]);
-      } else if (
+      } if (
         (x == 2 && y == 9 && this.tunele[this.plansza[x][y]][2] == 1) ||
         (x == 3 && y == 10 && this.tunele[this.plansza[x][y]][3] == 1) ||
         (x == 4 && y == 9 && this.tunele[this.plansza[x][y]][0] == 1) ||
         (x == 3 && y == 8 && this.tunele[this.plansza[x][y]][1] == 1)
       ) {
         this.revealSkarb(1, [3, 9]);
-      } else if (
+      } if (
         (x == 4 && y == 9 && this.tunele[this.plansza[x][y]][2] == 1) ||
         (x == 5 && y == 10 && this.tunele[this.plansza[x][y]][3] == 1) ||
         (x == 6 && y == 9 && this.tunele[this.plansza[x][y]][0] == 1) ||
