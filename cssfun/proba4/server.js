@@ -45,7 +45,9 @@ io.on("connection", (socket) => {
     for(let i = 1; i <= 10; i++){ 
         socket.emit("update_border", {playerId: i, isGreen: 0});  
         socket.emit("update_cards_left", {playerId: i, number: i}); 
+        socket.emit("update_blocks", {playerId: i, mask: i%8}); 
     }
+    socket.emit("update_gold", {gold:1}); 
     socket.emit("update_border", {playerId: GameStarter, isGreen: 1});  
 
 

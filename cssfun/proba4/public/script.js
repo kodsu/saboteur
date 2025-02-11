@@ -18,12 +18,30 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    const smallButtons = document.querySelectorAll(".small-buttons");
+    smallButtons.forEach((btn, index) => {
+        const pickaxe = btn.querySelector('.pickaxe');
+        const lantern = btn.querySelector('.lantern');
+        const cart = btn.querySelector('.cart');
+        pickaxe.addEventListener("click", function() {
+            if (selectedCard.element) placeCard(3*btn.id + 101);
+        });
+        lantern.addEventListener("click", function() {
+            if (selectedCard.element) placeCard(3*btn.id + 102);
+        });
+        cart.addEventListener("click", function() {
+            if (selectedCard.element) placeCard(3*btn.id + 103);
+        });
+    });
+
     // Nasłuchujemy kliknięć na karty w dolnym obszarze
     document.querySelectorAll(".bottom-cards .card").forEach(card => {
         card.addEventListener("click", function() {
             selectCard(card);
         });
     });
+
+    socket.on("update_gold", ({gold}) => document.querySelector(".gold-info").innerHTML = gold);
 });
 
 
@@ -181,6 +199,53 @@ socket.on("update_cards_left", ({ playerId, number }) => {
             cardCountElement.style.transform = 'scale(1.2)';
             setTimeout(() => {
                 cardCountElement.style.transform = 'scale(1)';
+            }, 200);
+        }
+    }
+}); 
+
+socket.on("update_blocks", ({ playerId, mask }) => {
+    console.log(`Aktualizacja blokad dla gracza ${playerId}, nowa maska: ${mask}`);
+    
+    const columns = document.querySelectorAll('.circle-buttons');
+    
+    let columnIndex, playerIndex;
+    if (playerId <= 5) {
+        columnIndex = 0;
+        playerIndex = playerId - 1;
+    } else {
+        columnIndex = 1;
+        playerIndex = playerId - 6;
+    }
+    
+    const players = columns[columnIndex].querySelectorAll('.small-buttons');
+    
+    if (players && players.length > playerIndex) {
+        const pickaxe = players[playerIndex].querySelector('.pickaxe');
+        const lantern = players[playerIndex].querySelector('.lantern');
+        const cart = players[playerIndex].querySelector('.cart');
+        if (pickaxe && (mask & 1)) {
+            pickaxe.style.backgroundImage = "url(wagon.png)";
+            // Dodaj animację dla lepszej widoczności zmian
+            pickaxe.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                pickaxe.style.transform = 'scale(1)';
+            }, 200);
+        }
+        if (lantern && (mask & 2)) {
+            lantern.style.backgroundImage = "url(wagon.png)";
+            // Dodaj animację dla lepszej widoczności zmian
+            lantern.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                lantern.style.transform = 'scale(1)';
+            }, 200);
+        }
+        if (cart && (mask & 4)) {
+            cart.style.backgroundImage = "url(wagon.png)";
+            // Dodaj animację dla lepszej widoczności zmian
+            cart.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                cart.style.transform = 'scale(1)';
             }, 200);
         }
     }
