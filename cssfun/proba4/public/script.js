@@ -24,13 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const lantern = btn.querySelector('.lantern');
         const cart = btn.querySelector('.cart');
         pickaxe.addEventListener("click", function() {
-            if (selectedCard.element) placeCard(3*btn.id + 101);
+            if (selectedCard.element) placeCard(`field-${3*btn.id + 101}`);
         });
         lantern.addEventListener("click", function() {
-            if (selectedCard.element) placeCard(3*btn.id + 102);
+            if (selectedCard.element) placeCard(`field-${3*btn.id + 102}`);
         });
         cart.addEventListener("click", function() {
-            if (selectedCard.element) placeCard(3*btn.id + 103);
+            if (selectedCard.element) placeCard(`field-${3*btn.id + 103}`);
         });
     });
 
