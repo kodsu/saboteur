@@ -38,10 +38,10 @@ io.engine.use(sessionMiddleware);
 app.get("/", (req, res) => {
   if(req.session.log) {
     req.session.log = false
-    res.render("index", {"guest":false, "text":"Zalogowano pomyślnie"})
+    res.render("main", {"guest":false, "text":"Zalogowano pomyślnie"})
   }
   else {
-    res.render("index", {"guest":sid_to_player.get(req.sessionID)?.guest, "text":""})
+    res.render("main", {"guest":sid_to_player.get(req.sessionID)?.guest, "text":""})
   }
 });
 app.get("/game/:n", (req, res) => {
@@ -70,54 +70,37 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  if(req.body.op == "Zaloguj się") {
-    db.get('SELECT name, password FROM users WHERE (name = ? AND password = ?)', req.body.name, req.body.password, (err, dbres) =>{
-      if(dbres) {
-        sid_to_player.set(req.sessionID, new Player(req.sessionID, req.body.name, null, false))
-        req.session.log = true
-        res.redirect("/")
-      }
-      else {
-        res.render("login", {"ok":"Złe dane", "guest":false})
-      }
-    })
-  }
-  else {
-    db.get('SELECT name FROM users WHERE name = ?', req.body.name, (err, dbres) =>{
-      if(dbres) {
-        res.render("register", {"ok":"Istnieje użytkownik o podanej nazwie", "guest":false})
-      }
-      else {
-        req.session.log = true
-        sid_to_player.set(req.sessionID, new Player(req.sessionID, req.body.name, null, false))
-        const stmt = db.prepare('INSERT INTO users VALUES (?, ?, 0, 0)')
-        stmt.run(req.body.name, req.body.password)
-        stmt.finalize()
-        res.redirect("/")
-      }
-    })
-  }
+  db.get('SELECT name, password FROM users WHERE (name = ? AND password = ?)', req.body.name, req.body.password, (err, dbres) =>{
+    if(dbres) {
+      sid_to_player.set(req.sessionID, new Player(req.sessionID, req.body.name, null, false))
+      req.session.log = true
+      res.redirect("/")
+    }
+    else {
+      res.render("login", {"ok":"Złe dane", "guest":false})
+    }
+  })
 });
 
-// app.get("/register", (req, res) => {
-//   res.render("register", {"ok":"","guest":false})
-// });
+app.get("/register", (req, res) => {
+  res.render("register", {"ok":"","guest":false})
+});
 
-// app.post("/register", (req, res) => {
-//   db.get('SELECT name FROM users WHERE name = ?', req.body.name, (err, dbres) =>{
-//     if(dbres) {
-//       res.render("register", {"ok":"Istnieje użytkownik o podanej nazwie", "guest":false})
-//     }
-//     else {
-//       req.session.log = true
-//       sid_to_player.set(req.sessionID, new Player(req.sessionID, req.body.name, null, false))
-//       const stmt = db.prepare('INSERT INTO users VALUES (?, ?, 0, 0)')
-//       stmt.run(req.body.name, req.body.password)
-//       stmt.finalize()
-//       res.redirect("/")
-//     }
-//   })
-// });
+app.post("/register", (req, res) => {
+  db.get('SELECT name FROM users WHERE name = ?', req.body.name, (err, dbres) =>{
+    if(dbres) {
+      res.render("register", {"ok":"Istnieje użytkownik o podanej nazwie", "guest":false})
+    }
+    else {
+      req.session.log = true
+      sid_to_player.set(req.sessionID, new Player(req.sessionID, req.body.name, null, false))
+      const stmt = db.prepare('INSERT INTO users VALUES (?, ?, 0, 0)')
+      stmt.run(req.body.name, req.body.password)
+      stmt.finalize()
+      res.redirect("/")
+    }
+  })
+});
 
 class Player {
   constructor(sid, name, roomid, guest) {

@@ -1,0 +1,10 @@
+<%- include('header', {title: "Pokoje"}); %>
+  Pokój <%= n %>
+  <button id="leaveRoom">Opuść Pokój</button>
+  <div class="center">
+    <button id="start">Start</button>
+    <label for="playerList">Lista Graczy</label>
+    <div id="playerList"></div>
+  </div>
+  <script src="/redirectButtons.js"></script>
+<%- include('footer', {script: "/roomscript.js"}); %>

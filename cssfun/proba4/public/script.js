@@ -282,3 +282,5 @@ socket.on("card_rotated", ({ cardImage, rotation }) => {
     const previewCard = document.querySelector('.preview-card');
     previewCard.style.transform = `rotate(${rotation}deg)`;
 });
+
+socket.emit("ready")
