@@ -1,7 +1,5 @@
 // Plik np. public/js/app.js
 
-const { query } = require("express");
-
 const socket = io();
 let selectedCard = {
     element: null,
