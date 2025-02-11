@@ -587,14 +587,14 @@ class GameSupervisor {
         if (this.rece[graczNaRuchu][j] == karta) {
           this.rece[graczNaRuchu][j] = this.karty.pop();
           this.kto = (this.kto + 1) % this.ile;
-          return [this.kto, this.plansza, this.rece[this.kto]];
+          return [this.kto, this.plansza, this.rece, this.blokady];
         }
       }
     }
     // otherwise, just remove it from player's hand
     this.rece[graczNaRuchu] = this.rece[graczNaRuchu].filter((it) => it != karta);
     this.kto = (this.kto + 1) % this.ile;
-    return [this.kto, this.plansza, this.rece[this.kto]];
+    return [this.kto, this.plansza, this.rece, this.blokady];
   }
 
   // przebieg gry

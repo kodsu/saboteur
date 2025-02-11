@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
     // Wysyłamy aktualny stan planszy nowemu graczowi
     socket.emit("update_board", boardState);
    
-
+    game.init(10)
     // Obsługa umieszczania karty na planszy
     socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
         // fieldId, cardImage, rotation -> 
@@ -96,19 +96,24 @@ io.on("connection", (socket) => {
         
         + 2 wozek */  
         
-        const start = 15; // Fixed start index for the card name
-        const end = 18;   // Fixed end index for the card name
-        const name = urlString.slice(start, end);
+        const start = cardImage.length-7; // Fixed start index for the card name
+        const end = cardImage.length-4;   // Fixed end index for the card name
+        const name = cardImage.slice(start, end);
+        fieldId = parseInt(fieldId.slice(6, fieldId.length))
         let result = 0;     
         if(fieldId <= 90){
-            result = game.ruch(fieldId / 11, fieldId %11, name, rotation); 
+            console.log(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0)
+            result = game.ruch(Math.floor(fieldId / 11), fieldId %11, name, rotation, 0); 
         }
         else 
         { 
-            result = game.ruch(fieldId - 81, 0, name, rotation);   
+            console.log(fieldId - 81, 0, name, rotation)
+            result = game.ruch(fieldId - 81, 0, name, rotation, 0);   
         }
-        for(let i = 1; i <= NumberofPlayers; i++){ 
+        console.log(result, result.length)
+        for(let i = 1; i <= 8; i++){ 
             full_layout(result[0], result[1], result[2], result[3], i); 
+            
             // musisz to komus wysłać 
         }
         if(game.check_end()) {
@@ -147,7 +152,9 @@ io.on("connection", (socket) => {
             io.emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
         }
         socket.emit("update_border", {playerId: kto+1, isGreen: 1}); 
-        const updatedCards = rece[k].map(card => card + ".png");
+        console.log(rece)
+        const updatedCards = rece[k].map(card =>  card + ".png");
+        console.log(updatedCards)
         io.emit("init_cards", {n: updatedCards.length, cards: updatedCards });   
         for(let i = 0; i < 7; i++){ 
             for(let j = 0; j < 11; j++){ 
