@@ -7,6 +7,7 @@ const { Server } = require('socket.io');
 
 const GameSupervisor = require("./logic-class");
 const { render } = require('ejs');
+const { result } = require('lodash');
 
 let game = new GameSupervisor()
 game.init_game()
@@ -77,15 +78,12 @@ io.on("connection", (socket) => {
         });
     });
 
-    // Przygotowanie kart dla użytkownika
-    userCards[socket.id] = availableCards; 
-
-    socket.emit("init_cards", { n: availableCards.length ,cards: availableCards});
-
-    // Wysyłamy aktualny stan planszy nowemu graczowi
-    socket.emit("update_board", boardState);
    
-    game.init(10)
+    let result = game.init(10)  
+    // result[4] -- roles 
+   //  console.log("initial rzeczy -- ", result)
+    full_layout(result[0], result[1], result[2], result[3], result[0]);  
+   
     // Obsługa umieszczania karty na planszy
     socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
         // fieldId, cardImage, rotation -> 
@@ -94,8 +92,8 @@ io.on("connection", (socket) => {
         + 0 kilof 
         + 1 latarnia 
         
-        + 2 wozek */  
-        
+        + 2 wozek */
+          
         const start = cardImage.length-7; // Fixed start index for the card name
         const end = cardImage.length-4;   // Fixed end index for the card name
         const name = cardImage.slice(start, end);
@@ -109,13 +107,10 @@ io.on("connection", (socket) => {
         { 
             console.log(fieldId - 81, 0, name, rotation)
             result = game.ruch(fieldId - 81, 0, name, rotation, 0);   
-        }
-        console.log(result, result.length)
-        for(let i = 1; i <= 8; i++){ 
-            full_layout(result[0], result[1], result[2], result[3], i); 
-            
-            // musisz to komus wysłać 
-        }
+        }  
+        
+        full_layout(result[0], result[1], result[2], result[3], result[0]);
+ 
         if(game.check_end()) {
             game.koniec()
             game.turn++;
@@ -123,20 +118,7 @@ io.on("connection", (socket) => {
                 io.emit("end")
         }
             
-            
-        // console.log(`Karta ${cardImage} umieszczona na ${fieldId}, rotacja: ${rotation}`);
-        // boardState[fieldId] = { cardImage, rotation };
-        // let name = cardImage.slice(-7); 
-
-        // let index = userCards[socket.id].indexOf(name); 
-        // console.log(name, userCards[socket.id]);
-        // if(index !== -1){ 
-        //     userCards[socket.id].splice(index, 1); 
-        // } 
-        // console.log(name, userCards[socket.id]); 
         
-        // io.emit("init_cards", { n: userCards[socket.id].length, cards: userCards[socket.id] });
-        // io.emit("update_board", boardState); 
     });
 
 // kto -- czyj ruch 
@@ -152,15 +134,15 @@ io.on("connection", (socket) => {
             io.emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
         }
         socket.emit("update_border", {playerId: kto+1, isGreen: 1}); 
-        console.log(rece)
         const updatedCards = rece[k].map(card =>  card + ".png");
-        console.log(updatedCards)
         io.emit("init_cards", {n: updatedCards.length, cards: updatedCards });   
+        // co sie dzieje ? 
         for(let i = 0; i < 7; i++){ 
-            for(let j = 0; j < 11; j++){ 
+            for(let j = 0; j < 11; j++){  
+                //console.log(`Pole ${i} ${j} w printowaniu`); 
                 socket.emit("set_card", {
                     fieldId: 11*i + j,
-                    cardImage: "url(/pictures/" + plansza[i][j] +".png)",
+                    cardImage: "url('/pictures/" + plansza[i][j] +".png')",
                 });
             }
         } 

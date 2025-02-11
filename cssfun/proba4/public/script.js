@@ -83,6 +83,9 @@ function selectCard(cardElem) {
     previewCard.style.backgroundImage = `url('${selectedCard.url}')`;
     previewCard.style.transform = 'rotate(0deg)';
     previewContainer.style.display = 'flex';
+    
+    // Aktywacja przycisku rotacji (przycisk musi mieć id="rotate-btn-main")
+    document.getElementById('rotate-btn-main').disabled = false;
 }
 
 function rotateCard() {
@@ -124,7 +127,7 @@ function placeCard(fieldId) {
         rotation: 0,
         originalParent: null
     };
-//    document.getElementById('rotate-btn-main').disabled = true;
+    document.getElementById('rotate-btn-main').disabled = true;
 }
 
 function getCleanBackgroundUrl(element) {
@@ -134,6 +137,18 @@ function getCleanBackgroundUrl(element) {
 }
 
 // Aktualizacja planszy – przyjmujemy stan planszy z serwera
+socket.on("update_board", (boardState) => {
+    for (const [fieldId, data] of Object.entries(boardState)) {
+        const field = document.getElementById(fieldId);
+        if (!field) continue;
+        
+        // Ustawiamy obrót pola i dodajemy obraz karty (jeśli chcesz, aby widoczny był również obraz)
+        field.style.transform = `rotate(${data.rotation}deg)`;
+        field.style.backgroundImage = `url('${data.cardImage}')`;
+    }
+});
+
+
 socket.on("update_board", (boardState) => {
     for (const [fieldId, data] of Object.entries(boardState)) {
         const field = document.getElementById(fieldId);
@@ -201,6 +216,12 @@ socket.on("update_cards_left", ({ playerId, number }) => {
     }
 }); 
 
+
+socket.on("set_card", ({ fieldId, cardImage }) => {
+    console.log(`set_card: Karta ${cardImage} umieszczona na ${fieldId}`);
+    document.querySelector(".grid").children[fieldId].style.backgroundImage = cardImage; 
+});
+
 socket.on("update_blocks", ({ playerId, mask }) => {
     console.log(`Aktualizacja blokad dla gracza ${playerId}, nowa maska: ${mask}`);
     
@@ -217,7 +238,8 @@ socket.on("update_blocks", ({ playerId, mask }) => {
     
     const players = columns[columnIndex].querySelectorAll('.small-buttons');
     
-    if (players && players.length > playerIndex) {
+    if (players && players.length > playerIndex) { 
+        console.log("ustawianie blokad", players, playerIndex); 
         const pickaxe = players[playerIndex].querySelector('.pickaxe');
         const lantern = players[playerIndex].querySelector('.lantern');
         const cart = players[playerIndex].querySelector('.cart');
