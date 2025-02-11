@@ -116,6 +116,7 @@ let roomready = new Map()
 let players = new Map()
 let sid_to_player = new Map()
 let names = new Set()
+let games = new Map()
 
 function rand_name() {
   let s = "Guest "
@@ -134,9 +135,6 @@ function smallest() {
   }
 }
 
-let game = new GameSupervisor()
-game.init_game()
-
 io.on("connect", socket => {
   const sid = socket.request.session.id;
   if(!sid_to_player.has(sid)) {
@@ -146,6 +144,8 @@ io.on("connect", socket => {
   }
   let player = sid_to_player.get(sid)
   let name = player.name
+  if(player.roomid)
+    socket.join(`Room${player.roomid}`);
 
   for(const n of roomids) {
     socket.emit("newRoom", n);
@@ -192,13 +192,18 @@ io.on("connect", socket => {
   })
 
   socket.on("start", () => {
-    let result = game.init(2)  
+    let game = new GameSupervisor()
+    games.set(player.roomid, game)
+    game.init_game()
+    let result = game.init(players[player.roomid].size)  
     socket.to(`Room${player.roomid}`).emit("start")
     full_layout(result[0], result[1], result[2], result[3], player.turn);  
   })
 
   socket.on("ready", () => {
-    full_layout(game.kto, game.plansza, game.rece, game.blokady, player.turn);  
+    let game = games.get(player.roomid)
+    if(game)
+      full_layout(game.kto, game.plansza, game.rece, game.blokady, player.turn);  
   })
       
   console.log("Użytkownik połączony:", socket.id);
@@ -244,6 +249,7 @@ io.on("connect", socket => {
  
   // Obsługa umieszczania karty na planszy
   socket.on("place_card", ({ fieldId, cardImage, rotation }) => { 
+    let game = games.get(player.roomid)
       // fieldId, cardImage, rotation -> 
       /* 
       20 + 3 * numer gracza  
@@ -287,21 +293,21 @@ io.on("connect", socket => {
       console.log(kto, plansza, rece, blokady, k)
       let NumberofPlayers = rece.length; 
       for(let i = 1; i <= NumberofPlayers; i++) { 
-          io.emit("update_border", {playerId: i, isGreen: 0}); 
-          io.emit("update_cards_left", {playerId: i, number: rece[i-1].length}); 
+          io.to(`Room${player.roomid}`).emit("update_border", {playerId: i, isGreen: 0}); 
+          io.to(`Room${player.roomid}`).emit("update_cards_left", {playerId: i, number: rece[i-1].length}); 
       } 
       for(let i = 0; i < NumberofPlayers; i++){ 
           let mask_m = 1*blokady[3*i] + 2 * blokady[3*i + 1] + 4*blokady[3*i + 2]; 
-          io.emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
+          io.to(`Room${player.roomid}`).emit("update_blocks", {playerId: i+  1, mask: mask_m}); 
       }
-      io.emit("update_border", {playerId: kto+1, isGreen: 1}); 
+      io.to(`Room${player.roomid}`).emit("update_border", {playerId: kto+1, isGreen: 1}); 
       const updatedCards = rece[k].map(card =>  card + ".png");
       socket.emit("init_cards", {n: updatedCards.length, cards: updatedCards });   
       // co sie dzieje ? 
       for(let i = 0; i < 7; i++){ 
           for(let j = 0; j < 11; j++){  
               //console.log(`Pole ${i} ${j} w printowaniu`); 
-              io.emit("set_card", {
+              io.to(`Room${player.roomid}`).emit("set_card", {
                   fieldId: 11*i + j,
                   cardImage: "url('/pictures/" + plansza[i][j] +".png')",
               });
