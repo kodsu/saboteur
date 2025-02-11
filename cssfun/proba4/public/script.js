@@ -106,10 +106,17 @@ function rotateCard() {
     // Informujemy serwer, że nastąpił obrót karty
 }
 
+// przekleić
+socket.on('set_image', (imageName) => {
+    console.log("Nowy obrazek:", imageName);
+    document.querySelector('.role').style.backgroundImage = `url('/pictures/${imageName}')`;
+});
+
 function placeCard(fieldId) {
     if (!selectedCard.element) return;
 
-    // Wysyłamy do serwera informacje o umieszczeniu karty
+    // Wysyłamy do serwera informacje o umieszczeniu karty 
+
     socket.emit("place_card", {
         fieldId: fieldId,
         cardImage: selectedCard.url,
