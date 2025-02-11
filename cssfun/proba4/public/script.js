@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
             selectCard(card);
         });
     });
+
+    socket.on("update_gold", ({gold}) => document.querySelector(".gold-info").innerHTML = gold);
 });
 
 
